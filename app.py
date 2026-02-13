@@ -3,17 +3,17 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button, TextBox, CheckButtons
 from matplotlib.patches import FancyArrowPatch
 
-# Configuração inicial
+
 fig, ax = plt.subplots(figsize=(12, 12))
 plt.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.3)
 
-# Parâmetros iniciais
-theta_deg = 60  # ângulo entre espelhos em graus
-obj_radius = 3.0  # distância do objeto à origem
-obj_angle_deg = 30  # ângulo do objeto em graus
-show_rays = False  # mostrar raios de luz
+#inicial
+theta_deg = 60
+obj_radius = 3.5
+obj_angle_deg = 30  
+show_rays = False
 
-# Limites do gráfico
+#limites graf
 ax.set_xlim(-5, 5)
 ax.set_ylim(-5, 5)
 ax.set_aspect('equal')
@@ -22,14 +22,14 @@ ax.set_title('Simulação de Espelhos Angulares - Óptica Geométrica')
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
 
-# Desenhar origem
+# origem
 ax.plot(0, 0, 'ko', markersize=8, zorder=10)
 
-# Variáveis para armazenar elementos gráficos
+
 mirror_lines = []
 obj_point = None
 image_points = []
-image_annotations = []  # PARA ARMAZENAR AS ANOTAÇÕES DOS NÚMEROS
+image_annotations = []  
 text_info = None
 ray_lines = []
 formula_text = None
@@ -37,7 +37,7 @@ annotation_text = None
 
 def calculate_images():
     """Calcula todas as imagens usando reflexões sucessivas"""
-    # Converter para radianos
+    # para radianos
     theta = np.radians(theta_deg)
     obj_angle = np.radians(obj_angle_deg)
     
@@ -61,10 +61,9 @@ def calculate_images():
     images = []
     image_angles = []
     
-    # Método: simular reflexões sucessivas
-    # Primeiro espelho (eixo X)
+  
+    #espelhos
     mirror1_angle = 0
-    # Segundo espelho
     mirror2_angle = theta
     
     # Usar abordagem sistemática
@@ -84,24 +83,24 @@ def calculate_images():
             sequences.append(seq)
         
         for seq in sequences:
-            # Calcular ângulo final após esta sequência
+        
             current_angle = obj_angle
             for mirror in seq:
-                if mirror == 0:  # reflexão no espelho 1
+                if mirror == 0: 
                     current_angle = 2 * mirror1_angle - current_angle
                 else:  # reflexão no espelho 2
                     current_angle = 2 * mirror2_angle - current_angle
             
-            # Normalizar ângulo
+         
             current_angle = current_angle % (2 * np.pi)
             if current_angle > np.pi:
                 current_angle -= 2 * np.pi
             
-            # Calcular posição
+         
             img_x = obj_radius * np.cos(current_angle)
             img_y = obj_radius * np.sin(current_angle)
             
-            # Arredondar para evitar duplicatas por erro numérico
+        
             pos_key = (round(img_x, 3), round(img_y, 3))
             
             if pos_key not in generated_positions:
@@ -109,7 +108,7 @@ def calculate_images():
                 images.append((img_x, img_y))
                 image_angles.append(current_angle)
     
-    # Limitar ao número teórico (para exibição clara)
+
     if len(images) > N_theory:
         images = images[:N_theory]
     
@@ -126,9 +125,7 @@ def calculate_ray_paths(obj_x, obj_y, images, image_angles):
     for i in range(min(3, len(images))):
         img_x, img_y = images[i]
         
-        # Criar caminho simples direto para demonstração
-        # Na realidade, o raio refletiria nos espelhos
-        # Mas para simplicidade, mostraremos caminho direto
+   
         path_points = [(obj_x, obj_y), (img_x, img_y)]
         ray_paths.append(path_points)
     
@@ -182,7 +179,6 @@ def update_simulation():
     obj_x = obj_radius * np.cos(obj_angle)
     obj_y = obj_radius * np.sin(obj_angle)
     
-    # Desenhar espelhos
     mirror_length = 5
     mirror1_x = [0, mirror_length]
     mirror1_y = [0, 0]
@@ -206,28 +202,27 @@ def update_simulation():
                            label=f'Imagem {i+1}', zorder=5)
         image_points.append(img_point)
         
-        # Anotar número da imagem (AGORA ARMAZENAMOS A REFERÊNCIA)
         offset_x = 0.2 * np.cos(np.arctan2(img_y, img_x))
         offset_y = 0.2 * np.sin(np.arctan2(img_y, img_x))
         ann = ax.annotate(str(i+1), (img_x + offset_x, img_y + offset_y),
                          fontsize=8, color='darkred', fontweight='bold')
-        image_annotations.append(ann)  # ADICIONAR À LISTA
+        image_annotations.append(ann) 
     
-    # Calcular e desenhar raios de luz se ativado
+   
     if show_rays and len(images) > 0:
         ray_paths = calculate_ray_paths(obj_x, obj_y, images, image_angles)
         
         colors = ['orange', 'purple', 'brown']
         for i, path in enumerate(ray_paths):
             if len(path) > 1:
-                # Desenhar linha tracejada para o raio
+             
                 x_vals = [p[0] for p in path]
                 y_vals = [p[1] for p in path]
                 ray_line, = ax.plot(x_vals, y_vals, '--', linewidth=1.5,
                                   color=colors[i % len(colors)], alpha=0.7)
                 ray_lines.append(ray_line)
                 
-                # Adicionar seta
+
                 if len(path) == 2:
                     arrow = FancyArrowPatch(path[0], path[1],
                                           arrowstyle='->', 
@@ -247,7 +242,7 @@ def update_simulation():
     text_info = ax.text(-4.8, -4.8, info_text, fontsize=10,
                        bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
     
-    # Adicionar fórmula em destaque
+    # formula destaque
     if theta_deg > 0:
         formula_display = f"Equação dos Espelhos:\n"
         formula_display += r"$N = \frac{360^\circ}{\theta} - 1$" + "\n"
@@ -261,7 +256,7 @@ def update_simulation():
         formula_text = ax.text(3.5, 4.2, formula_display, fontsize=11,
                               bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.9))
     
-    # Adicionar anotações explicativas
+    # explicações
     if theta_deg > 0:
         explanation = f"Espelho 2 está a {theta_deg}° do Espelho 1\n"
       #  explanation += f"Cada reflexão muda o ângulo em {2*theta_deg}°\n"
@@ -392,3 +387,4 @@ fig.canvas.mpl_connect('button_press_event', on_click)
 update_simulation()
 
 plt.show()
+
